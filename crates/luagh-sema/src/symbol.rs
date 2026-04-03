@@ -33,7 +33,10 @@ impl Symbol {
 
     /// Returns true if this name starts with `_` (conventional "unused" marker).
     pub fn is_underscore_prefixed(&self) -> bool {
-        self.name.starts_with('_') && self.name != "_G" && self.name != "_ENV" && self.name != "_VERSION"
+        self.name.starts_with('_')
+            && self.name != "_G"
+            && self.name != "_ENV"
+            && self.name != "_VERSION"
     }
 }
 

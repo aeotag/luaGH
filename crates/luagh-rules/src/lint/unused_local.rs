@@ -53,10 +53,7 @@ Example:
             .filter(|sym| {
                 // Skip parameters unless explicitly configured
                 !sym.is_parameter
-                    && matches!(
-                        sym.kind,
-                        SymbolKind::LocalVariable | SymbolKind::Function
-                    )
+                    && matches!(sym.kind, SymbolKind::LocalVariable | SymbolKind::Function)
             })
             .map(|sym| {
                 let mut diag = Diagnostic::new(

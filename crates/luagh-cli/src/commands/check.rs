@@ -6,13 +6,13 @@ use rayon::prelude::*;
 use walkdir::WalkDir;
 
 use luagh_config::{self, Config};
-use luagh_core::{Diagnostic, LuaVersion, OutputFormat, Severity};
-use luagh_parser::{self, ParsedFile};
+use luagh_core::{Diagnostic, LuaVersion, Severity};
+use luagh_parser;
 use luagh_rules::{RuleContext, RuleRegistry};
 use luagh_sema;
 
-use crate::output;
 use crate::Cli;
+use crate::output;
 
 /// Run all checks on the given paths.
 pub fn run(paths: &[PathBuf], cli: &Cli) -> Result<bool, Box<dyn std::error::Error>> {
@@ -25,7 +25,12 @@ pub fn run(paths: &[PathBuf], cli: &Cli) -> Result<bool, Box<dyn std::error::Err
     let fail_level: Severity = cli.fail_on.clone().into();
     let has_failures = diagnostics.iter().any(|d| d.severity >= fail_level);
 
-    output::write_output(&diagnostics, files.len(), cli.format.clone().into(), cli.quiet)?;
+    output::write_output(
+        &diagnostics,
+        files.len(),
+        cli.format.clone().into(),
+        cli.quiet,
+    )?;
 
     Ok(has_failures)
 }
@@ -45,34 +50,34 @@ pub fn run_category(
     let fail_level: Severity = cli.fail_on.clone().into();
     let has_failures = diagnostics.iter().any(|d| d.severity >= fail_level);
 
-    output::write_output(&diagnostics, files.len(), cli.format.clone().into(), cli.quiet)?;
+    output::write_output(
+        &diagnostics,
+        files.len(),
+        cli.format.clone().into(),
+        cli.quiet,
+    )?;
 
     Ok(has_failures)
 }
 
 /// Syntax-only check (parse only, no semantic analysis).
-pub fn run_syntax_only(
-    paths: &[PathBuf],
-    cli: &Cli,
-) -> Result<bool, Box<dyn std::error::Error>> {
+pub fn run_syntax_only(paths: &[PathBuf], cli: &Cli) -> Result<bool, Box<dyn std::error::Error>> {
     let config = load_config(cli)?;
     let files = discover_files(paths, &config)?;
 
     let diagnostics: Vec<Diagnostic> = files
         .par_iter()
-        .flat_map(|file| {
-            match luagh_parser::parse_file(file) {
-                Ok(_parsed) => Vec::new(),
-                Err(luagh_parser::ParseError::Parse { diagnostics, .. }) => diagnostics,
-                Err(luagh_parser::ParseError::Io { path, source }) => {
-                    vec![Diagnostic::new(
-                        "syntax.io_error",
-                        Severity::Error,
-                        format!("cannot read file: {source}"),
-                        path,
-                        luagh_core::Span::default(),
-                    )]
-                }
+        .flat_map(|file| match luagh_parser::parse_file(file) {
+            Ok(_parsed) => Vec::new(),
+            Err(luagh_parser::ParseError::Parse { diagnostics, .. }) => diagnostics,
+            Err(luagh_parser::ParseError::Io { path, source }) => {
+                vec![Diagnostic::new(
+                    "syntax.io_error",
+                    Severity::Error,
+                    format!("cannot read file: {source}"),
+                    path,
+                    luagh_core::Span::default(),
+                )]
             }
         })
         .collect();
@@ -80,7 +85,12 @@ pub fn run_syntax_only(
     let fail_level: Severity = cli.fail_on.clone().into();
     let has_failures = diagnostics.iter().any(|d| d.severity >= fail_level);
 
-    output::write_output(&diagnostics, files.len(), cli.format.clone().into(), cli.quiet)?;
+    output::write_output(
+        &diagnostics,
+        files.len(),
+        cli.format.clone().into(),
+        cli.quiet,
+    )?;
 
     Ok(has_failures)
 }
@@ -163,7 +173,9 @@ fn analyze_files_category(
 ) -> Vec<Diagnostic> {
     files
         .par_iter()
-        .flat_map(|file| analyze_single_file_category(file, config, lua_version, registry, category))
+        .flat_map(|file| {
+            analyze_single_file_category(file, config, lua_version, registry, category)
+        })
         .collect()
 }
 

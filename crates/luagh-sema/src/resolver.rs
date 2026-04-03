@@ -7,16 +7,14 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use full_moon::ast::{self, Ast};
-use full_moon::visitors::Visitor;
 
-use luagh_core::{
-    Diagnostic, LineIndex, LuaVersion, Position, Severity, Span, SymbolKind,
-};
+use luagh_core::{Diagnostic, LineIndex, LuaVersion, Position, Span, SymbolKind};
 
 use crate::scope::{ScopeId, ScopeKind, ScopeTree};
 use crate::symbol::{Symbol, SymbolId, SymbolTable};
 
 /// The resolver walks the AST and builds the scope tree + symbol table.
+#[allow(dead_code)]
 pub struct Resolver<'a> {
     lua_version: LuaVersion,
     line_index: &'a LineIndex,
@@ -83,12 +81,7 @@ impl<'a> Resolver<'a> {
         self.scope_stack.pop().expect("scope stack underflow")
     }
 
-    fn define_symbol(
-        &mut self,
-        name: String,
-        kind: SymbolKind,
-        span: Span,
-    ) -> SymbolId {
+    fn define_symbol(&mut self, name: String, kind: SymbolKind, span: Span) -> SymbolId {
         let scope_id = self.current_scope();
         let symbol = Symbol {
             id: 0, // Will be set by SymbolTable::add
@@ -162,19 +155,15 @@ impl<'a> Resolver<'a> {
         // Register each declared name as a local variable
         for name_token in node.names() {
             let name = name_token.to_string().trim().to_string();
-            let token_pos = name_token.start_position().unwrap_or_default();
-            let end_pos = name_token.end_position().unwrap_or_default();
+            let token_pos = name_token.start_position();
+            let end_pos = name_token.end_position();
             let span = Span::new(
                 Position::new(
                     token_pos.line() as u32 - 1,
                     token_pos.character() as u32 - 1,
                     0,
                 ),
-                Position::new(
-                    end_pos.line() as u32 - 1,
-                    end_pos.character() as u32 - 1,
-                    0,
-                ),
+                Position::new(end_pos.line() as u32 - 1, end_pos.character() as u32 - 1, 0),
             );
 
             // Determine if this is a function assignment
@@ -210,7 +199,7 @@ impl<'a> Resolver<'a> {
 
         // If it's a method, add implicit `self` parameter
         if is_method {
-            let mut self_sym = Symbol {
+            let self_sym = Symbol {
                 id: 0,
                 name: "self".to_string(),
                 kind: SymbolKind::Parameter,
@@ -232,19 +221,15 @@ impl<'a> Resolver<'a> {
 
     fn visit_local_function(&mut self, node: &ast::LocalFunction) {
         let name = node.name().to_string().trim().to_string();
-        let token_pos = node.name().start_position().unwrap_or_default();
-        let end_pos = node.name().end_position().unwrap_or_default();
+        let token_pos = node.name().start_position();
+        let end_pos = node.name().end_position();
         let span = Span::new(
             Position::new(
                 token_pos.line() as u32 - 1,
                 token_pos.character() as u32 - 1,
                 0,
             ),
-            Position::new(
-                end_pos.line() as u32 - 1,
-                end_pos.character() as u32 - 1,
-                0,
-            ),
+            Position::new(end_pos.line() as u32 - 1, end_pos.character() as u32 - 1, 0),
         );
 
         // Register as a local function

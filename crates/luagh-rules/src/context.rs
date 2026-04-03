@@ -4,8 +4,8 @@ use std::path::Path;
 
 use full_moon::ast::Ast;
 
-use luagh_core::{LineIndex, LuaVersion};
 use luagh_config::{Config, NamingConfig};
+use luagh_core::{LineIndex, LuaVersion};
 use luagh_sema::{ScopeTree, SymbolTable};
 
 /// Context provided to each rule's `check()` method.
@@ -54,7 +54,9 @@ impl<'a> RuleContext<'a> {
     /// Check if a global name is known (standard library or configured).
     pub fn is_known_global(&self, name: &str) -> bool {
         let std_globals: std::collections::HashSet<&str> =
-            luagh_core::std_globals(self.lua_version).into_iter().collect();
+            luagh_core::std_globals(self.lua_version)
+                .into_iter()
+                .collect();
         std_globals.contains(name) || self.config.globals.is_known(name)
     }
 }

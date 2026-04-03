@@ -78,9 +78,7 @@ impl fmt::Display for Span {
 // ---------------------------------------------------------------------------
 
 /// Diagnostic severity level. Ordered: Hint < Info < Warning < Error.
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Severity {
     Hint,
@@ -613,10 +611,7 @@ mod tests {
             LuaVersion::Luau,
         ] {
             let globals = std_globals(version);
-            assert!(
-                globals.contains(&"print"),
-                "print missing for {version}"
-            );
+            assert!(globals.contains(&"print"), "print missing for {version}");
         }
     }
 }

@@ -21,11 +21,8 @@ pub enum ConfigError {
     #[error("TOML parse error: {0}")]
     Toml(#[from] toml::de::Error),
 
-    #[error("invalid regex in naming config for {field}: {source}")]
-    InvalidRegex {
-        field: String,
-        source: String,
-    },
+    #[error("invalid regex in naming config for {field}: {message}")]
+    InvalidRegex { field: String, message: String },
 }
 
 // ---------------------------------------------------------------------------
@@ -33,7 +30,7 @@ pub enum ConfigError {
 // ---------------------------------------------------------------------------
 
 /// Root configuration structure corresponding to `luagh.toml`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default)]
 pub struct Config {
     /// Lua standard version.
@@ -54,19 +51,6 @@ pub struct Config {
     /// Per-path override sections.
     #[serde(default)]
     pub overrides: Vec<PathOverride>,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            std: LuaVersion::default(),
-            files: FilesConfig::default(),
-            globals: GlobalsConfig::default(),
-            rules: HashMap::new(),
-            naming: NamingConfig::default(),
-            overrides: Vec::new(),
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -265,7 +249,10 @@ pub fn load_config_or_default(start_dir: &Path) -> Config {
         Some(path) => match load_config(&path) {
             Ok(config) => config,
             Err(e) => {
-                eprintln!("warning: failed to load config from {}: {e}", path.display());
+                eprintln!(
+                    "warning: failed to load config from {}: {e}",
+                    path.display()
+                );
                 Config::default()
             }
         },

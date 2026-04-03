@@ -5,8 +5,8 @@ use std::collections::HashSet;
 
 use regex::Regex;
 
-use luagh_core::SymbolKind;
 use luagh_config::NamingConfig;
+use luagh_core::SymbolKind;
 
 /// A naming convention violation.
 #[derive(Debug)]
@@ -74,14 +74,14 @@ impl NamingConventionEngine {
             return None;
         }
 
-        if let Some(pattern) = self.patterns.get(&kind) {
-            if !pattern.is_match(name) {
-                return Some(NamingViolation {
-                    name: name.to_string(),
-                    kind,
-                    expected_pattern: pattern.to_string(),
-                });
-            }
+        if let Some(pattern) = self.patterns.get(&kind)
+            && !pattern.is_match(name)
+        {
+            return Some(NamingViolation {
+                name: name.to_string(),
+                kind,
+                expected_pattern: pattern.to_string(),
+            });
         }
 
         None
@@ -116,18 +116,10 @@ mod tests {
     #[test]
     fn test_snake_case_local() {
         let engine = default_engine();
-        assert!(engine
-            .check("my_var", SymbolKind::LocalVariable)
-            .is_none());
-        assert!(engine
-            .check("_temp", SymbolKind::LocalVariable)
-            .is_none());
-        assert!(engine
-            .check("MyVar", SymbolKind::LocalVariable)
-            .is_some());
-        assert!(engine
-            .check("myVar", SymbolKind::LocalVariable)
-            .is_some());
+        assert!(engine.check("my_var", SymbolKind::LocalVariable).is_none());
+        assert!(engine.check("_temp", SymbolKind::LocalVariable).is_none());
+        assert!(engine.check("MyVar", SymbolKind::LocalVariable).is_some());
+        assert!(engine.check("myVar", SymbolKind::LocalVariable).is_some());
     }
 
     #[test]
@@ -135,34 +127,26 @@ mod tests {
         let engine = default_engine();
         assert!(engine.check("ProcessData", SymbolKind::Function).is_none());
         assert!(engine.check("Init", SymbolKind::Function).is_none());
-        assert!(engine
-            .check("process_data", SymbolKind::Function)
-            .is_some());
+        assert!(engine.check("process_data", SymbolKind::Function).is_some());
     }
 
     #[test]
     fn test_ignore_names() {
         let engine = default_engine();
-        assert!(engine
-            .check("_G", SymbolKind::GlobalVariable)
-            .is_none());
-        assert!(engine
-            .check("self", SymbolKind::Parameter)
-            .is_none());
-        assert!(engine
-            .check("_VERSION", SymbolKind::GlobalVariable)
-            .is_none());
+        assert!(engine.check("_G", SymbolKind::GlobalVariable).is_none());
+        assert!(engine.check("self", SymbolKind::Parameter).is_none());
+        assert!(
+            engine
+                .check("_VERSION", SymbolKind::GlobalVariable)
+                .is_none()
+        );
     }
 
     #[test]
     fn test_metamethods_exempt() {
         let engine = default_engine();
-        assert!(engine
-            .check("__index", SymbolKind::Function)
-            .is_none());
-        assert!(engine
-            .check("__tostring", SymbolKind::Function)
-            .is_none());
+        assert!(engine.check("__index", SymbolKind::Function).is_none());
+        assert!(engine.check("__tostring", SymbolKind::Function).is_none());
     }
 
     #[test]

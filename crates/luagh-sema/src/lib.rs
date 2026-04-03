@@ -11,7 +11,7 @@ pub use resolver::Resolver;
 pub use scope::{Scope, ScopeId, ScopeKind, ScopeTree};
 pub use symbol::{Symbol, SymbolId, SymbolTable};
 
-use luagh_core::{Diagnostic, LineIndex, LuaVersion};
+use luagh_core::{Diagnostic, LuaVersion};
 use luagh_parser::ParsedFile;
 
 /// Result of semantic analysis on a single file.

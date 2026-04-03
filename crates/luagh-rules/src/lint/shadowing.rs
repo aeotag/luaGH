@@ -75,22 +75,14 @@ To suppress: rename one of the variables, or disable this rule.
                                 let mut diag = Diagnostic::new(
                                     self.id(),
                                     self.default_severity(),
-                                    format!(
-                                        "`{}` shadows a variable from an outer scope",
-                                        name
-                                    ),
+                                    format!("`{}` shadows a variable from an outer scope", name),
                                     ctx.file_path,
                                     sym.def_span,
                                 )
-                                .with_help(
-                                    "consider renaming to avoid confusion".to_string(),
-                                );
+                                .with_help("consider renaming to avoid confusion".to_string());
 
-                                if let Some(line) =
-                                    ctx.source_line(sym.def_span.start.line)
-                                {
-                                    diag =
-                                        diag.with_source_excerpt(line.to_string());
+                                if let Some(line) = ctx.source_line(sym.def_span.start.line) {
+                                    diag = diag.with_source_excerpt(line.to_string());
                                 }
 
                                 diagnostics.push(diag);

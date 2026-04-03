@@ -5,7 +5,7 @@
 use luagh_core::{Diagnostic, RuleCategory, Severity, SymbolKind};
 
 use crate::context::RuleContext;
-use crate::naming::convention::{describe_pattern, NamingConventionEngine};
+use crate::naming::convention::{NamingConventionEngine, describe_pattern};
 use crate::rule::Rule;
 
 // ---------------------------------------------------------------------------
@@ -67,17 +67,11 @@ Names in the `ignore_names` list are always exempt.
                 let mut diag = Diagnostic::new(
                     self.id(),
                     self.default_severity(),
-                    format!(
-                        "local variable `{}` should be {pattern_desc}",
-                        sym.name
-                    ),
+                    format!("local variable `{}` should be {pattern_desc}", sym.name),
                     ctx.file_path,
                     sym.def_span,
                 )
-                .with_suggestion(format!(
-                    "expected pattern: {}",
-                    violation.expected_pattern
-                ));
+                .with_suggestion(format!("expected pattern: {}", violation.expected_pattern));
 
                 if let Some(line) = ctx.source_line(sym.def_span.start.line) {
                     diag = diag.with_source_excerpt(line.to_string());
@@ -140,17 +134,11 @@ impl Rule for GlobalVariableCase {
                 let mut diag = Diagnostic::new(
                     self.id(),
                     self.default_severity(),
-                    format!(
-                        "global variable `{}` should be {pattern_desc}",
-                        sym.name
-                    ),
+                    format!("global variable `{}` should be {pattern_desc}", sym.name),
                     ctx.file_path,
                     sym.def_span,
                 )
-                .with_suggestion(format!(
-                    "expected pattern: {}",
-                    violation.expected_pattern
-                ));
+                .with_suggestion(format!("expected pattern: {}", violation.expected_pattern));
 
                 if let Some(line) = ctx.source_line(sym.def_span.start.line) {
                     diag = diag.with_source_excerpt(line.to_string());

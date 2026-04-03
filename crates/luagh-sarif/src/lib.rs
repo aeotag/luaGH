@@ -5,7 +5,7 @@
 
 use std::io::Write;
 
-use luagh_core::{Diagnostic, Severity};
+use luagh_core::Diagnostic;
 use serde::Serialize;
 
 // ---------------------------------------------------------------------------
@@ -106,10 +106,7 @@ pub struct SarifRegion {
 /// Convert LuaGH diagnostics to a SARIF log.
 pub fn to_sarif(diagnostics: &[Diagnostic], tool_version: &str) -> SarifLog {
     // Collect unique rule IDs for the rules array
-    let mut rule_ids: Vec<String> = diagnostics
-        .iter()
-        .map(|d| d.rule_id.clone())
-        .collect();
+    let mut rule_ids: Vec<String> = diagnostics.iter().map(|d| d.rule_id.clone()).collect();
     rule_ids.sort();
     rule_ids.dedup();
 
@@ -178,8 +175,7 @@ pub fn format_sarif(
     writer: &mut dyn Write,
 ) -> std::io::Result<()> {
     let sarif = to_sarif(diagnostics, tool_version);
-    let json = serde_json::to_string_pretty(&sarif)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+    let json = serde_json::to_string_pretty(&sarif).map_err(std::io::Error::other)?;
     writeln!(writer, "{json}")?;
     Ok(())
 }
@@ -191,7 +187,7 @@ pub fn format_sarif(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use luagh_core::{Position, Span};
+    use luagh_core::{Position, Severity, Span};
     use std::path::PathBuf;
 
     #[test]

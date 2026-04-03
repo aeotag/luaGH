@@ -54,13 +54,7 @@ pub fn format_text(diagnostics: &[Diagnostic], writer: &mut dyn Write) -> std::i
 
         // Help text
         if let Some(ref help) = diag.help {
-            let padding = " ".repeat(
-                diag.span
-                    .start
-                    .display_line()
-                    .to_string()
-                    .len(),
-            );
+            let padding = " ".repeat(diag.span.start.display_line().to_string().len());
             writeln!(writer, "{padding} |")?;
             writeln!(writer, "{padding} = help: {help}")?;
         }
@@ -209,8 +203,7 @@ pub fn format_json(
         diagnostics: json_diags,
     };
 
-    let json = serde_json::to_string_pretty(&output)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+    let json = serde_json::to_string_pretty(&output).map_err(std::io::Error::other)?;
     writeln!(writer, "{json}")?;
     Ok(())
 }

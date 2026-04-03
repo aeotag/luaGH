@@ -135,7 +135,10 @@ mod tests {
         let child = tree.push(Some(root), ScopeKind::Function);
 
         // Define "x" in root scope
-        tree.get_mut(root).unwrap().symbols.insert("x".to_string(), 0);
+        tree.get_mut(root)
+            .unwrap()
+            .symbols
+            .insert("x".to_string(), 0);
 
         // Lookup "x" from child should find it in parent
         assert_eq!(tree.lookup("x", child), Some(0));
@@ -151,8 +154,14 @@ mod tests {
         let child = tree.push(Some(root), ScopeKind::Function);
 
         // Define "x" in both scopes
-        tree.get_mut(root).unwrap().symbols.insert("x".to_string(), 0);
-        tree.get_mut(child).unwrap().symbols.insert("x".to_string(), 1);
+        tree.get_mut(root)
+            .unwrap()
+            .symbols
+            .insert("x".to_string(), 0);
+        tree.get_mut(child)
+            .unwrap()
+            .symbols
+            .insert("x".to_string(), 1);
 
         // Lookup from child should find the inner one
         assert_eq!(tree.lookup("x", child), Some(1));

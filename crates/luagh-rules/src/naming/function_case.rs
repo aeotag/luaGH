@@ -5,7 +5,7 @@
 use luagh_core::{Diagnostic, RuleCategory, Severity, SymbolKind};
 
 use crate::context::RuleContext;
-use crate::naming::convention::{describe_pattern, NamingConventionEngine};
+use crate::naming::convention::{NamingConventionEngine, describe_pattern};
 use crate::rule::Rule;
 
 // ---------------------------------------------------------------------------
@@ -70,17 +70,11 @@ Configure the pattern in luagh.toml:
                 let mut diag = Diagnostic::new(
                     self.id(),
                     self.default_severity(),
-                    format!(
-                        "function `{}` should be {pattern_desc}",
-                        sym.name
-                    ),
+                    format!("function `{}` should be {pattern_desc}", sym.name),
                     ctx.file_path,
                     sym.def_span,
                 )
-                .with_suggestion(format!(
-                    "expected pattern: {}",
-                    violation.expected_pattern
-                ));
+                .with_suggestion(format!("expected pattern: {}", violation.expected_pattern));
 
                 if let Some(line) = ctx.source_line(sym.def_span.start.line) {
                     diag = diag.with_source_excerpt(line.to_string());
@@ -157,16 +151,11 @@ Configure the pattern in luagh.toml:
                 let mut diag = Diagnostic::new(
                     self.id(),
                     self.default_severity(),
-                    format!(
-                        "method `{method_name}` should be {pattern_desc}",
-                    ),
+                    format!("method `{method_name}` should be {pattern_desc}",),
                     ctx.file_path,
                     sym.def_span,
                 )
-                .with_suggestion(format!(
-                    "expected pattern: {}",
-                    violation.expected_pattern
-                ));
+                .with_suggestion(format!("expected pattern: {}", violation.expected_pattern));
 
                 if let Some(line) = ctx.source_line(sym.def_span.start.line) {
                     diag = diag.with_source_excerpt(line.to_string());

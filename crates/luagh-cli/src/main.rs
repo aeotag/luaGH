@@ -145,27 +145,13 @@ fn main() -> ExitCode {
     let start = std::time::Instant::now();
 
     let result = match cli.command {
-        Commands::Check { ref paths } => {
-            commands::check::run(paths, &cli)
-        }
-        Commands::Lint { ref paths } => {
-            commands::check::run_category(paths, &cli, "lint")
-        }
-        Commands::Syntax { ref paths } => {
-            commands::check::run_syntax_only(paths, &cli)
-        }
-        Commands::Naming { ref paths } => {
-            commands::check::run_category(paths, &cli, "naming")
-        }
-        Commands::Explain { ref rule_id } => {
-            commands::explain::run(rule_id)
-        }
-        Commands::Rules => {
-            commands::rules::run()
-        }
-        Commands::Init => {
-            commands::init::run()
-        }
+        Commands::Check { ref paths } => commands::check::run(paths, &cli),
+        Commands::Lint { ref paths } => commands::check::run_category(paths, &cli, "lint"),
+        Commands::Syntax { ref paths } => commands::check::run_syntax_only(paths, &cli),
+        Commands::Naming { ref paths } => commands::check::run_category(paths, &cli, "naming"),
+        Commands::Explain { ref rule_id } => commands::explain::run(rule_id),
+        Commands::Rules => commands::rules::run(),
+        Commands::Init => commands::init::run(),
         Commands::Version => {
             println!("luagh {}", env!("CARGO_PKG_VERSION"));
             Ok(false)

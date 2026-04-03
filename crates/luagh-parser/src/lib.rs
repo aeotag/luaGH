@@ -94,11 +94,7 @@ fn convert_parse_error(
                     start_pos.character() as u32 - 1,
                     0,
                 ),
-                Position::new(
-                    end_pos.line() as u32 - 1,
-                    end_pos.character() as u32 - 1,
-                    0,
-                ),
+                Position::new(end_pos.line() as u32 - 1, end_pos.character() as u32 - 1, 0),
             )
         }
         full_moon::Error::TokenizerError(tok_err) => {
@@ -106,7 +102,6 @@ fn convert_parse_error(
             let p = Position::new(pos.line() as u32 - 1, pos.character() as u32 - 1, 0);
             Span::single(p)
         }
-        _ => Span::default(),
     };
 
     Diagnostic::new("syntax.parse_error", Severity::Error, message, path, span)
@@ -150,10 +145,7 @@ mod tests {
     fn test_source_excerpt() {
         let source = "local x = 1\nprint(x)\nreturn x\n";
         let idx = LineIndex::new(source);
-        let span = Span::new(
-            Position::new(1, 0, 12),
-            Position::new(1, 8, 20),
-        );
+        let span = Span::new(Position::new(1, 0, 12), Position::new(1, 8, 20));
         let excerpt = source_excerpt(source, &idx, &span);
         assert_eq!(excerpt, Some("print(x)".to_string()));
     }

@@ -5,7 +5,7 @@ use luagh_rules::RuleRegistry;
 pub fn run() -> Result<bool, Box<dyn std::error::Error>> {
     let registry = RuleRegistry::builtin();
 
-    println!("{:<35} {:<10} {}", "RULE ID", "SEVERITY", "DESCRIPTION");
+    println!("{:<35} {:<10} DESCRIPTION", "RULE ID", "SEVERITY");
     println!("{}", "-".repeat(80));
 
     for rule in registry.iter() {
