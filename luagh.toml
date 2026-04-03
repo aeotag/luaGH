@@ -6,7 +6,7 @@ std = "lua54"
 
 [files]
 include = ["**/*.lua", "**/*.luau"]
-exclude = ["**/node_modules/**", "**/vendor/**", "**/.luarocks/**"]
+exclude = ["**/node_modules/**", "**/vendor/**", "**/.luarocks/**", "tests/fixtures/**"]
 
 [globals]
 # Additional read-write globals (empty by default)
