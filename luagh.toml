@@ -14,6 +14,15 @@ read_write = []
 # Additional read-only globals (empty by default)
 read_only = []
 
+# ─── Named Regex Patterns ──────────────────────────────────────────────
+# Define patterns here and reference them by name in [naming].
+
+[regex]
+snake_case           = '^[a-z_][a-z0-9_]*$'
+pascal_case          = '^[A-Z][A-Za-z0-9]*$'
+screaming_snake_case = '^[A-Z][A-Z0-9_]*$'
+camel_case           = '^[a-z][a-zA-Z0-9]*$'
+
 # ─── Rule Configuration ────────────────────────────────────────────────
 
 [rules]
@@ -29,13 +38,22 @@ read_only = []
 "naming.method_case"          = "warning"
 
 # ─── Naming Conventions ────────────────────────────────────────────────
+# Use pattern names from [regex] or raw regex strings.
+#
+# With named patterns:
+#   local_variable = "snake_case"        → resolves to '^[a-z_][a-z0-9_]*$'
+#   function       = "pascal_case"       → resolves to '^[A-Z][A-Za-z0-9]*$'
+#
+# Module-style globals like `Config` (from config.lua) use pascal_case
+# so you can write: Config.time.format
 
 [naming]
-local_variable  = "^[a-z_][a-zA-Z0-9_]*$"     # snake_case or camelCase
-global_variable = "^[A-Z_][A-Z0-9_]*$"          # UPPER_CASE
-function        = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
-method          = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
-parameter       = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
+local_variable  = "snake_case"
+global_variable = "pascal_case"
+function        = "pascal_case"
+method          = "snake_case"
+constant        = "screaming_snake_case"
+parameter       = "snake_case"
 
 # Names that are always allowed regardless of convention
 ignore_names = [

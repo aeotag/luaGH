@@ -42,6 +42,9 @@ pub struct Config {
     /// Known global variables.
     pub globals: GlobalsConfig,
 
+    /// Named regex patterns that can be referenced by name in `[naming]`.
+    pub regex: HashMap<String, String>,
+
     /// Per-rule configuration overrides.
     pub rules: HashMap<String, RuleOverride>,
 
@@ -149,6 +152,9 @@ pub struct DetailedRuleOverride {
 // ---------------------------------------------------------------------------
 
 /// Naming convention patterns for each symbol kind.
+///
+/// Values can be either raw regex strings (e.g. `"^[a-z_][a-z0-9_]*$"`) or
+/// names referencing a pattern defined in the `[regex]` table (e.g. `"snake_case"`).
 #[derive(Debug, Clone, Deserialize)]
 #[serde(default)]
 pub struct NamingConfig {
@@ -159,6 +165,29 @@ pub struct NamingConfig {
     pub constant: Option<String>,
     pub parameter: Option<String>,
     pub ignore_names: Vec<String>,
+}
+
+impl NamingConfig {
+    /// Resolve named pattern references through the `[regex]` table.
+    ///
+    /// If a naming field's value matches a key in `patterns`, it is replaced
+    /// with the corresponding regex string. Values that already look like
+    /// regex (or don't match any key) are left as-is.
+    pub fn resolve(&mut self, patterns: &HashMap<String, String>) {
+        fn resolve_field(field: &mut Option<String>, patterns: &HashMap<String, String>) {
+            if let Some(val) = field.as_ref()
+                && let Some(regex) = patterns.get(val.as_str())
+            {
+                *field = Some(regex.clone());
+            }
+        }
+        resolve_field(&mut self.local_variable, patterns);
+        resolve_field(&mut self.global_variable, patterns);
+        resolve_field(&mut self.function, patterns);
+        resolve_field(&mut self.method, patterns);
+        resolve_field(&mut self.constant, patterns);
+        resolve_field(&mut self.parameter, patterns);
+    }
 }
 
 impl Default for NamingConfig {
@@ -239,7 +268,9 @@ pub fn find_config_file(start_dir: &Path) -> Option<PathBuf> {
 /// Load config from a specific file path.
 pub fn load_config(path: &Path) -> Result<Config, ConfigError> {
     let content = std::fs::read_to_string(path)?;
-    let config: Config = toml::from_str(&content)?;
+    let mut config: Config = toml::from_str(&content)?;
+    // Resolve named regex references in naming config
+    config.naming.resolve(&config.regex);
     Ok(config)
 }
 
@@ -268,33 +299,33 @@ pub fn generate_default_config() -> String {
 # Lua standard version: lua51, lua52, lua53, lua54, luajit, luau
 std = "lua54"
 
-# File selection
 [files]
 include = ["**/*.lua"]
 exclude = ["vendor/**", "node_modules/**", ".luarocks/**"]
 
-# Known globals (in addition to the standard library)
 [globals]
-# Read-write globals
 rw = []
-# Read-only globals (writing to these produces a warning)
 ro = []
 
-# Rule configuration
-# Set a rule to "off" to disable, or override its severity.
+# Named regex patterns — reference these by name in [naming]
+[regex]
+snake_case           = "^[a-z_][a-z0-9_]*$"
+pascal_case          = "^[A-Z][A-Za-z0-9]*$"
+screaming_snake_case = "^[A-Z][A-Z0-9_]*$"
+camel_case           = "^[a-z][a-zA-Z0-9]*$"
+
 [rules]
 # "lint.shadowing" = "off"
 # "lint.unused_local" = "warning"
 # "naming.function_case" = "error"
-# "style.line_length" = { severity = "warning", max = 120 }
 
-# Naming conventions (regex patterns per symbol kind)
+# Naming conventions — use pattern names from [regex] or raw regex strings
 [naming]
-local_variable = "^[a-z_][a-z0-9_]*$"
-global_variable = "^[a-z_][a-z0-9_]*$"
-function = "^[A-Z][A-Za-z0-9]*$"
-method = "^[A-Z][A-Za-z0-9]*$"
-constant = "^[A-Z][A-Z0-9_]*$"
+local_variable  = "snake_case"
+global_variable = "pascal_case"
+function        = "pascal_case"
+method          = "snake_case"
+constant        = "screaming_snake_case"
 ignore_names = [
     "_", "_G", "_ENV", "_VERSION", "self",
     "__index", "__newindex", "__call", "__tostring",
@@ -308,7 +339,6 @@ ignore_names = [
 # paths = ["tests/**"]
 # [overrides.rules]
 # "lint.undefined_global" = "off"
-# "naming.function_case" = "off"
 "#
     .to_string()
 }
@@ -379,5 +409,56 @@ mod tests {
         assert!(!globals.is_known("unknown"));
         assert!(!globals.is_read_only("MY_GLOBAL"));
         assert!(globals.is_read_only("love"));
+    }
+
+    #[test]
+    fn test_regex_named_patterns_resolve() {
+        let toml_str = r#"
+            std = "lua54"
+
+            [regex]
+            snake_case  = "^[a-z_][a-z0-9_]*$"
+            pascal_case = "^[A-Z][A-Za-z0-9]*$"
+
+            [naming]
+            local_variable  = "snake_case"
+            global_variable = "pascal_case"
+            function        = "pascal_case"
+        "#;
+
+        let mut config: Config = toml::from_str(toml_str).unwrap();
+        config.naming.resolve(&config.regex);
+
+        assert_eq!(
+            config.naming.local_variable.as_deref(),
+            Some("^[a-z_][a-z0-9_]*$")
+        );
+        assert_eq!(
+            config.naming.global_variable.as_deref(),
+            Some("^[A-Z][A-Za-z0-9]*$")
+        );
+        assert_eq!(
+            config.naming.function.as_deref(),
+            Some("^[A-Z][A-Za-z0-9]*$")
+        );
+    }
+
+    #[test]
+    fn test_regex_raw_passthrough() {
+        let toml_str = r#"
+            std = "lua54"
+
+            [naming]
+            local_variable = "^[a-z_][a-z0-9_]*$"
+        "#;
+
+        let mut config: Config = toml::from_str(toml_str).unwrap();
+        config.naming.resolve(&config.regex);
+
+        // Raw regex should pass through unchanged when no [regex] table matches
+        assert_eq!(
+            config.naming.local_variable.as_deref(),
+            Some("^[a-z_][a-z0-9_]*$")
+        );
     }
 }
