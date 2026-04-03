@@ -1,0 +1,10 @@
+[package]
+name = "luagh-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Core types for LuaGH static analysis"
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
