@@ -1,0 +1,54 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/luagh-cli",
+    "crates/luagh-core",
+    "crates/luagh-parser",
+    "crates/luagh-sema",
+    "crates/luagh-rules",
+    "crates/luagh-config",
+    "crates/luagh-diagnostics",
+    "crates/luagh-sarif",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Yannic"]
+repository = "https://github.com/yannic/luaGH"
+description = "Lua Guard Hub — fast, extensible static analysis for Lua and Luau"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Error handling
+thiserror = "2"
+
+# Regex
+regex = "1"
+
+# Lua parser
+full_moon = { version = "1", features = ["luau"] }
+
+# Parallelism
+rayon = "1.10"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# File discovery
+walkdir = "2"
+globset = "0.4"
+
+# Internal crates
+luagh-core = { path = "crates/luagh-core" }
+luagh-parser = { path = "crates/luagh-parser" }
+luagh-sema = { path = "crates/luagh-sema" }
+luagh-rules = { path = "crates/luagh-rules" }
+luagh-config = { path = "crates/luagh-config" }
+luagh-diagnostics = { path = "crates/luagh-diagnostics" }
+luagh-sarif = { path = "crates/luagh-sarif" }
