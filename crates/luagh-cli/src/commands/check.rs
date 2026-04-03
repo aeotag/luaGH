@@ -2,6 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use rayon::prelude::*;
 use walkdir::WalkDir;
 
@@ -121,6 +122,9 @@ fn discover_files(
     paths: &[PathBuf],
     config: &Config,
 ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+    let include_set = build_glob_set(&config.files.include)?;
+    let exclude_set = build_glob_set(&config.files.exclude)?;
+
     let mut files = Vec::new();
 
     for path in paths {
@@ -133,7 +137,7 @@ fn discover_files(
                 .filter_map(|e| e.ok())
             {
                 let entry_path = entry.path();
-                if entry_path.is_file() && is_lua_file(entry_path, config) {
+                if entry_path.is_file() && should_include(entry_path, &include_set, &exclude_set) {
                     files.push(entry_path.to_path_buf());
                 }
             }
@@ -143,13 +147,19 @@ fn discover_files(
     Ok(files)
 }
 
-fn is_lua_file(path: &Path, _config: &Config) -> bool {
-    // Simple extension-based check for now
-    // TODO: Use config include/exclude globs
-    matches!(
-        path.extension().and_then(|e| e.to_str()),
-        Some("lua" | "luau")
-    )
+fn build_glob_set(patterns: &[String]) -> Result<GlobSet, Box<dyn std::error::Error>> {
+    let mut builder = GlobSetBuilder::new();
+    for pattern in patterns {
+        builder.add(Glob::new(pattern)?);
+    }
+    Ok(builder.build()?)
+}
+
+fn should_include(path: &Path, include_set: &GlobSet, exclude_set: &GlobSet) -> bool {
+    let path_str = path.to_string_lossy();
+    // Normalize backslashes to forward slashes for glob matching
+    let normalized = path_str.replace('\\', "/");
+    include_set.is_match(&normalized) && !exclude_set.is_match(&normalized)
 }
 
 fn analyze_files(
