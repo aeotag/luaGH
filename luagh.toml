@@ -44,12 +44,12 @@ camel_case           = '^[a-z][a-zA-Z0-9]*$'
 #   local_variable = "snake_case"        → resolves to '^[a-z_][a-z0-9_]*$'
 #   function       = "pascal_case"       → resolves to '^[A-Z][A-Za-z0-9]*$'
 #
-# Module-style globals like `Config` (from config.lua) use pascal_case
-# so you can write: Config.time.format
+# Module-style globals like `Config` (from config.lua) are exempted
+# via ignore_names so they don't break the snake_case rule.
 
 [naming]
 local_variable  = "snake_case"
-global_variable = "pascal_case"
+global_variable = "snake_case"
 function        = "pascal_case"
 method          = "snake_case"
 constant        = "screaming_snake_case"
