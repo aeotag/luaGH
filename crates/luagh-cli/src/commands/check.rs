@@ -159,7 +159,9 @@ fn should_include(path: &Path, include_set: &GlobSet, exclude_set: &GlobSet) -> 
     let path_str = path.to_string_lossy();
     // Normalize backslashes to forward slashes for glob matching
     let normalized = path_str.replace('\\', "/");
-    include_set.is_match(&normalized) && !exclude_set.is_match(&normalized)
+    // Strip leading "./" so globs like "tests/fixtures/**" match
+    let normalized = normalized.strip_prefix("./").unwrap_or(&normalized);
+    include_set.is_match(normalized) && !exclude_set.is_match(normalized)
 }
 
 fn analyze_files(
