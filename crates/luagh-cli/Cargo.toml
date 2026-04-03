@@ -1,0 +1,24 @@
+[package]
+name = "luagh"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "LuaGH CLI — fast static analysis for Lua and Luau"
+
+[[bin]]
+name = "luagh"
+path = "src/main.rs"
+
+[dependencies]
+luagh-core = { workspace = true }
+luagh-parser = { workspace = true }
+luagh-sema = { workspace = true }
+luagh-rules = { workspace = true }
+luagh-config = { workspace = true }
+luagh-diagnostics = { workspace = true }
+luagh-sarif = { workspace = true }
+clap = { workspace = true }
+rayon = { workspace = true }
+walkdir = { workspace = true }
+globset = { workspace = true }
+serde_json = { workspace = true }
