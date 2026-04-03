@@ -1,0 +1,40 @@
+# Example workflow: Run LuaGH on your Lua project with SARIF upload
+#
+# Copy this file to your project's .github/workflows/ directory
+# and adjust the paths and configuration as needed.
+
+name: LuaGH Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  luagh:
+    name: Lua Static Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install LuaGH (adjust version as needed)
+      - name: Install LuaGH
+        run: cargo install luagh-cli
+
+      # Run analysis with SARIF output
+      - name: Run LuaGH
+        run: luagh check --format sarif . > results.sarif
+        continue-on-error: true
+
+      # Upload SARIF to GitHub Code Scanning
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      # Also run text output for PR feedback
+      - name: Run LuaGH (text)
+        run: luagh check --fail-on warning .
