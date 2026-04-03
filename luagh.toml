@@ -1,0 +1,71 @@
+# LuaGH — Default Configuration
+# See: https://github.com/yannic/luaGH
+
+# Lua standard library version
+std = "lua54"
+
+[files]
+include = ["**/*.lua", "**/*.luau"]
+exclude = ["**/node_modules/**", "**/vendor/**", "**/.luarocks/**"]
+
+[globals]
+# Additional read-write globals (empty by default)
+read_write = []
+# Additional read-only globals (empty by default)
+read_only = []
+
+# ─── Rule Configuration ────────────────────────────────────────────────
+
+[rules]
+# Lint rules
+"lint.unused_local"      = "warning"
+"lint.undefined_global"  = "error"
+"lint.shadowing"         = "info"
+
+# Naming convention rules
+"naming.local_variable_case"  = "warning"
+"naming.global_variable_case" = "warning"
+"naming.function_case"        = "warning"
+"naming.method_case"          = "warning"
+
+# ─── Naming Conventions ────────────────────────────────────────────────
+
+[naming]
+local_variable  = "^[a-z_][a-zA-Z0-9_]*$"     # snake_case or camelCase
+global_variable = "^[A-Z_][A-Z0-9_]*$"          # UPPER_CASE
+function        = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
+method          = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
+parameter       = "^[a-z_][a-zA-Z0-9_]*$"       # snake_case or camelCase
+
+# Names that are always allowed regardless of convention
+ignore_names = [
+    "_",
+    "self",
+    "__index",
+    "__newindex",
+    "__call",
+    "__tostring",
+    "__len",
+    "__unm",
+    "__add",
+    "__sub",
+    "__mul",
+    "__div",
+    "__mod",
+    "__pow",
+    "__concat",
+    "__eq",
+    "__lt",
+    "__le",
+    "__gc",
+    "__mode",
+    "__metatable",
+]
+
+# ─── Per-Path Overrides ────────────────────────────────────────────────
+
+# Example: disable unused_local warnings in test files
+# [[overrides]]
+# path = "tests/**"
+# [overrides.rules]
+# "lint.unused_local" = "off"
