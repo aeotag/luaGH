@@ -20,9 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install LuaGH (adjust version as needed)
+      # Install Rust toolchain
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Build and install LuaGH from source
       - name: Install LuaGH
-        run: cargo install luagh-cli
+        run: cargo install --path crates/luagh-cli
 
       # Run analysis with SARIF output
       - name: Run LuaGH
