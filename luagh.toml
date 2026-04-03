@@ -58,6 +58,7 @@ parameter       = "snake_case"
 # Names that are always allowed regardless of convention
 ignore_names = [
     "_",
+    "Config",
     "self",
     "__index",
     "__newindex",
